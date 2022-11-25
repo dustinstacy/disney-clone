@@ -25,9 +25,12 @@ const Content = styled.div`
 const BgImage = styled.div`
   position: absolute;
   height: 100%;
-  width: 100%;
   background-image: url("/images/login-background.jpg");
   background-size: cover;
+  background-position: top;
+  top: 0;
+  right: 0;
+  left: 0;
   z-index: -1;
 `;
 
@@ -73,6 +76,7 @@ const Description = styled.p`
 const CTALogoTwo = styled.img`
   max-width: 600px;
   margin-bottom: 20px;
+  display: inline-block;
 `;
 
 const Login = (props) => {
