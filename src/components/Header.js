@@ -1,51 +1,109 @@
 import styled from "styled-components";
 import { auth } from "../firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {
+  selectUserName,
+  selectUserPhoto,
+  setSignOutState,
+  setUserLoginDetails,
+} from "../features/user/userSlice";
+import { useEffect } from "react";
 
 const Header = (props) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const userName = useSelector(selectUserName);
+  const userPhoto = useSelector(selectUserPhoto);
+
   const handleAuth = () => {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log(result);
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
+
+    if (!userName) {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          setUser(result.user);
+          console.log(result);
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    } else if (userName) {
+      auth
+        .signOut()
+        .then(() => {
+          dispatch(setSignOutState());
+          navigate("/");
+        })
+        .catch((err) => alert(err.message));
+    }
   };
+
+  const setUser = (user) => {
+    dispatch(
+      setUserLoginDetails({
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+      })
+    );
+  };
+
+  useEffect(() => {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(user);
+        navigate("/home");
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userName]);
 
   return (
     <Nav>
       <Logo>
         <img src="/images/logo.svg" alt="" />
       </Logo>
-      <NavMenu>
-        <a href="/home">
-          <img src="/images/home-icon.svg" alt="home" />
-          <span>HOME</span>
-        </a>
-        <a href="/search">
-          <img src="/images/search-icon.svg" alt="search" />
-          <span>SEARCH</span>
-        </a>
-        <a href="/watchlist">
-          <img src="/images/watchlist-icon.svg" alt="watchlist" />
-          <span>WATCHLIST</span>
-        </a>
-        <a href="/originals">
-          <img src="/images/original-icon.svg" alt="originals" />
-          <span>ORIGINALS</span>
-        </a>
-        <a href="/movies">
-          <img src="/images/movie-icon.svg" alt="movies" />
-          <span>MOVIES</span>
-        </a>
-        <a href="/series">
-          <img src="/images/series-icon.svg" alt="series" />
-          <span>SERIES</span>
-        </a>
-      </NavMenu>
-      <Login onClick={handleAuth}>Login</Login>
+
+      {!userName ? (
+        <Login onClick={handleAuth}>Login</Login>
+      ) : (
+        <>
+          <NavMenu>
+            <a href="/home">
+              <img src="/images/home-icon.svg" alt="home" />
+              <span>HOME</span>
+            </a>
+            <a href="/search">
+              <img src="/images/search-icon.svg" alt="search" />
+              <span>SEARCH</span>
+            </a>
+            <a href="/watchlist">
+              <img src="/images/watchlist-icon.svg" alt="watchlist" />
+              <span>WATCHLIST</span>
+            </a>
+            <a href="/originals">
+              <img src="/images/original-icon.svg" alt="originals" />
+              <span>ORIGINALS</span>
+            </a>
+            <a href="/movies">
+              <img src="/images/movie-icon.svg" alt="movies" />
+              <span>MOVIES</span>
+            </a>
+            <a href="/series">
+              <img src="/images/series-icon.svg" alt="series" />
+              <span>SERIES</span>
+            </a>
+          </NavMenu>
+          <SignOut>
+            <UserImg src={userPhoto} alt={userName} />
+            <DropDown>
+              <span onClick={handleAuth}>Sign out</span>
+            </DropDown>
+          </SignOut>
+        </>
+      )}
     </Nav>
   );
 };
@@ -159,6 +217,49 @@ const Login = styled.a`
     color: #000;
     border-color: transparent;
     cursor: pointer;
+  }
+`;
+
+const UserImg = styled.img`
+  height: 90%;
+  letter-spacing: 1.5px;
+`;
+
+const DropDown = styled.div`
+  position: absolute;
+  top: 48px;
+  right: 0px;
+  background: rgb(19, 19, 19);
+  border: 1px solid rgba(151, 151, 151, 0.6);
+  border-radius: 4px;
+  box-shadow: rgb(0 0 0 / 50%) 0px 0px 18px 0px;
+  padding: 10px;
+  font-size: 14px;
+  letter-spacing: 3px;
+  width: 100px;
+  opacity: 0;
+`;
+
+const SignOut = styled.div`
+  position: relative;
+  height: 48px;
+  width: 48px;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+
+  ${UserImg} {
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover {
+    ${DropDown} {
+      opacity: 1;
+      transition-duration: 1s;
+    }
   }
 `;
 
