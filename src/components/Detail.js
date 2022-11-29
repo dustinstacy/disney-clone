@@ -2,40 +2,32 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import db from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
 import { getMovies } from "../firebase";
 
 const Detail = (props) => {
   const { id } = useParams();
   const [detailData, setDetailData] = useState({});
 
-  function getMovieId(db) {
-    const moviesColl = collection(db, "movies");
-    const movieSnapshot = getDocs(moviesColl);
-    return movieSnapshot;
-  }
-
   useEffect(() => {
-    getMovieId(db).then((doc) => {
-      for (let i = 0; i < doc.length; i++) {
-        let movie = doc[i];
-        if ((i = 1)) {
-          setDetailData(doc.data());
-          console.log(movie.data());
+    getMovies(db).then((doc) => {
+      doc.forEach((movie) => {
+        if (movie.id === id) {
+          setDetailData(movie.data());
         } else {
           console.log("no such document in firebase");
         }
-      }
+      });
     });
   }, [id]);
 
+  console.log(detailData);
   return (
     <Container>
       <Background>
         <img alt={detailData.title} src={detailData.backgroundImg} />
       </Background>
       <ImageTitle>
-        <img alt="" src=""></img>
+        <img alt="" src={detailData.titleImg}></img>
       </ImageTitle>
       <ContentMeta>
         <Controls>
@@ -57,7 +49,7 @@ const Detail = (props) => {
             </div>
           </GroupWatch>
         </Controls>
-        <SubTitle>{detailData.subTilte}</SubTitle>
+        <SubTitle>{detailData.subTitle}</SubTitle>
         <Description>{detailData.description}</Description>
       </ContentMeta>
     </Container>

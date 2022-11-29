@@ -22,28 +22,28 @@ const Home = (props) => {
     let trendings = [];
 
     getMovies(db).then((doc) => {
-      for (let i = 0; i < doc.length; i++) {
-        let movie = doc[i];
-        switch (movie.type) {
+      doc.forEach((movie) => {
+        switch (movie.data().type) {
           case "recommend":
-            recommends = [...recommends, { id: i, ...movie }];
+            recommends = [...recommends, { id: movie.id, ...movie.data() }];
             break;
 
           case "new":
-            newDisneys = [...newDisneys, { id: i, ...movie }];
+            newDisneys = [...newDisneys, { id: movie.id, ...movie.data() }];
             break;
 
           case "original":
-            originals = [...originals, { id: i, ...movie }];
+            originals = [...originals, { id: movie.id, ...movie.data() }];
             break;
 
           case "trending":
-            trendings = [...trendings, { id: i, ...movie }];
+            trendings = [...trendings, { id: movie.id, ...movie.data() }];
             break;
           default:
             console.log(`No movies match type ${movie.type}`);
         }
-      }
+        console.log(recommends);
+      });
 
       dispatch(
         setMovies({

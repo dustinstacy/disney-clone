@@ -22,12 +22,21 @@ const db = getFirestore(app);
 export async function getMovies(db) {
   const moviesColl = collection(db, "movies");
   const movieSnapshot = await getDocs(moviesColl);
-  const movieList = movieSnapshot.docs.map((doc) => doc.data());
-  return movieList;
+  return movieSnapshot;
 }
 
 export const auth = getAuth(app);
 export default db;
+
+// const getMovieData = (db) => {
+//   getMovies(db).then((doc) => {
+//     doc.forEach((movie) => {
+//       console.log(movie.data().type);
+//     });
+//   });
+// };
+
+// getMovieData(db);
 
 // async function updateData() {
 //   await addDoc(collection(db, "movies"), {
